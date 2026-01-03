@@ -1,0 +1,1142 @@
+================================================================================
+                     SKILLSHARE PLATFORM - COMPLETE DOCUMENTATION
+================================================================================
+
+Date: January 2, 2026
+Version: 2.0 (Supabase Backend)
+Status: Production Ready
+
+================================================================================
+                              TABLE OF CONTENTS
+================================================================================
+
+1. PLATFORM OVERVIEW
+2. TECHNOLOGY STACK
+3. ARCHITECTURE
+4. BACKEND DETAILS
+5. FRONTEND STRUCTURE
+6. FEATURE BREAKDOWN
+7. DATABASE SCHEMA
+8. API ENDPOINTS REFERENCE
+9. USER FLOWS
+10. DEPLOYMENT & CONFIGURATION
+11. TROUBLESHOOTING
+
+================================================================================
+                           1. PLATFORM OVERVIEW
+================================================================================
+
+SkillShare is a comprehensive peer-to-peer learning platform that connects 
+learners with mentors for micro-courses and live sessions. The platform uses 
+a token-based payment system and includes gamification features.
+
+KEY CAPABILITIES:
+- User authentication with role-based access (Learner, Mentor, Both)
+- Course creation and management
+- Live 1-on-1 and group session booking
+- Token-based economy with wallet management
+- Gamification (XP, Levels, Badges, Leaderboards)
+- Community forum
+- Real-time messaging
+- Admin dashboard
+- Progress tracking
+- Review and rating system
+
+================================================================================
+                          2. TECHNOLOGY STACK
+================================================================================
+
+FRONTEND:
+- React 18 with TypeScript
+- React Router for navigation
+- Context API for state management
+- Tailwind CSS for styling
+- shadcn/ui component library
+- Sonner for toast notifications
+- Lucide React for icons
+- Recharts for data visualization
+
+BACKEND:
+- Supabase Edge Functions (Deno runtime)
+- Hono.js web framework
+- Key-Value Store for data persistence
+- SHA-256 for password hashing
+
+DEPLOYMENT:
+- Frontend: Figma Make (React hosting)
+- Backend: Supabase Edge Functions
+- Database: Supabase KV Store
+
+================================================================================
+                            3. ARCHITECTURE
+================================================================================
+
+ARCHITECTURE TYPE:
+Three-tier client-server architecture
+
+FLOW:
+Frontend (React) → Supabase Edge Function (Hono Server) → KV Store (Database)
+
+API BASE URL:
+https://{projectId}.supabase.co/functions/v1/make-server-d45a5820
+
+AUTHENTICATION:
+- Bearer token authentication using Supabase public anon key
+- Password hashing using SHA-256
+- Session management via localStorage
+- Admin authentication via separate admin token
+
+DATA STORAGE:
+All data is stored in Supabase's Key-Value store with prefixed keys:
+- user:{userId}
+- auth:{email}
+- course:{courseId}
+- session:{sessionId}
+- enrollment:{userId}:{courseId}
+- transaction:{transactionId}
+- review:{reviewId}
+- notification:{notificationId}
+- forumPost:{postId}
+- chatSession:{sessionId}
+- chatMessage:{messageId}
+
+================================================================================
+                          4. BACKEND DETAILS
+================================================================================
+
+LOCATION: /supabase/functions/server/index.tsx
+
+SERVER FRAMEWORK: Hono.js
+- Lightweight web framework for Deno
+- CORS enabled for all origins
+- Request logging enabled
+- JSON response format
+
+KEY FEATURES:
+1. Authentication System
+   - Signup with email/password
+   - Login with credential verification
+   - Password hashing (SHA-256)
+   - No JWT - uses session storage
+
+2. User Management
+   - Profile updates (name, bio, avatar, skills, role)
+   - User retrieval (individual and all users)
+   - Role-based access (learner, mentor, both)
+
+3. Course System
+   - Course creation by mentors
+   - Course filtering (category, search, mentorId)
+   - Course updates and deletion
+   - Module and resource management
+   - Enrollment tracking
+
+4. Enrollment System
+   - Token-based course enrollment
+   - Progress tracking by module
+   - Automatic token transfer (learner → mentor)
+   - XP awards for module completion
+   - Transaction logging
+
+5. Session Booking
+   - 1-on-1 and group session creation
+   - Session status management (upcoming, in-progress, completed, cancelled)
+   - Meeting URL generation
+   - Token payment processing
+   - Notification system
+
+6. Wallet & Transactions
+   - Token top-up functionality
+   - Transaction history
+   - Automatic transaction creation for all token movements
+   - Transaction types: credit/debit
+
+7. Review System
+   - Course and mentor reviews
+   - Star rating (1-5)
+   - Tag-based categorization
+   - Automatic rating calculation
+   - Review aggregation
+
+8. Forum System
+   - Post creation with categories
+   - Post filtering and search
+   - Reply tracking
+   - Author information display
+
+9. Messaging System
+   - Chat session management
+   - Message history
+   - Real-time message storage
+   - Participant tracking
+
+10. Notification System
+    - Multiple notification types (session, badge, message, system)
+    - Read/unread status
+    - User-specific notification lists
+
+11. Gamification
+    - XP award system
+    - Level calculation (1000 XP per level)
+    - Badge checking and awarding
+    - Leaderboard generation
+    - Achievement tracking
+
+12. Admin Functions
+    - User suspension/activation
+    - User management
+    - Admin authentication
+
+KV STORE HELPER: /supabase/functions/server/kv_store.tsx
+- get(key): Retrieve single value
+- set(key, value): Store single value
+- del(key): Delete single value
+- mget(keys[]): Retrieve multiple values
+- mset(entries[]): Store multiple values
+- mdel(keys[]): Delete multiple values
+- getByPrefix(prefix): Retrieve all values with prefix
+
+================================================================================
+                         5. FRONTEND STRUCTURE
+================================================================================
+
+ENTRY POINT: /App.tsx
+- Routes configuration
+- Protected route handling
+- Admin route protection
+- App context provider
+
+CONTEXT: /context/AppContext.tsx
+- Global state management
+- User authentication state
+- User data management
+- Login/logout functions
+
+PAGES (14 total):
+1. Landing.tsx - Marketing homepage
+2. Signup.tsx - User registration
+3. Login.tsx - User authentication
+4. ForgotPassword.tsx - Password recovery
+5. Onboarding.tsx - Skill selection wizard
+6. Dashboard.tsx - Role-adaptive dashboard
+7. Explore.tsx - Course discovery with filters
+8. CourseDetail.tsx - Course information and enrollment
+9. CoursePlayer.tsx - Video player with progress tracking
+10. CreateCourse.tsx - Course creation form for mentors
+11. Wallet.tsx - Token management and transactions
+12. Leaderboard.tsx - XP rankings
+13. Community.tsx - Forum discussions
+14. LiveSession.tsx - Video conference interface
+15. Messages.tsx - Direct messaging
+16. AdminLogin.tsx - Admin authentication
+17. AdminDashboard.tsx - User management panel
+
+COMPONENTS:
+- Header.tsx - Navigation bar
+- Footer.tsx - Site footer
+- BackendStatus.tsx - Server health indicator
+- CourseReviews.tsx - Review display component
+- ui/* - 40+ shadcn/ui components
+
+UTILITIES:
+- /utils/api.ts - API client with typed methods
+- /utils/supabase/info.tsx - Supabase configuration
+- /utils/seedData.ts - Mock data generator
+
+TYPES: /types/index.ts
+- TypeScript interfaces for all data models
+
+STYLING: /styles/globals.css
+- Tailwind CSS configuration
+- Custom CSS variables
+- Typography system
+
+================================================================================
+                        6. FEATURE BREAKDOWN
+================================================================================
+
+6.1 AUTHENTICATION & ONBOARDING
+---------------------------------
+User Registration:
+- Email and password
+- Name and role selection
+- Automatic Early Adopter badge
+- 100 token welcome bonus
+- Level 1 starting point
+
+User Login:
+- Email/password verification
+- Session persistence
+- Redirect to onboarding or dashboard
+
+Onboarding:
+- Skill selection interface
+- Tag-based categorization
+- Profile completion
+
+6.2 ROLE-ADAPTIVE DASHBOARD
+-----------------------------
+For Learners:
+- Continue learning section
+- Enrolled courses
+- Upcoming sessions
+- Progress tracking
+- XP and level display
+
+For Mentors:
+- Course management
+- Session schedule
+- Earnings overview
+- Student enrollments
+- Performance metrics
+
+For Both:
+- Combined view of all features
+- Quick action buttons
+- Notification center
+
+6.3 COURSE SYSTEM
+------------------
+Course Creation:
+- Title, description, category
+- Price in tokens
+- Thumbnail upload
+- Module addition (title, duration, video URL)
+- Resource attachments (PDF, links)
+- Language and duration settings
+
+Course Discovery:
+- Category filtering
+- Search functionality
+- Rating display
+- Enrollment count
+- Mentor information
+
+Course Enrollment:
+- Token payment
+- Instant access
+- Progress initialization
+- Transaction recording
+- Notification to learner and mentor
+
+Course Player:
+- Video playback
+- Module navigation
+- Progress auto-save
+- Completion tracking
+- Resource downloads
+- XP rewards per module
+- Bonus XP on course completion
+
+6.4 LIVE SESSIONS
+------------------
+Session Creation:
+- Title and description
+- Date and time selection
+- Duration specification
+- Token price
+- Meeting URL auto-generation
+
+Session Booking:
+- Calendar view
+- Mentor availability
+- Token verification
+- Confirmation system
+- Email notifications (simulated)
+
+Session Management:
+- Status updates (upcoming → in-progress → completed)
+- Video conference interface
+- Chat functionality
+- Screen sharing
+- Recording options
+
+6.5 TOKEN ECONOMY
+------------------
+Token Sources:
+- Welcome bonus (100 tokens)
+- Top-up purchases
+- Earnings from teaching
+- Session completions
+
+Token Usage:
+- Course enrollment
+- Session booking
+- Future: Premium features
+
+Wallet Features:
+- Current balance display
+- Transaction history
+- Top-up functionality
+- Filtering (all, credit, debit)
+- Date sorting
+
+6.6 GAMIFICATION SYSTEM
+------------------------
+XP System:
+- Course enrollment: 50 XP
+- Module completion: 20 XP
+- Course completion: 100 XP
+- Session completion (mentor): 80 XP
+- Session completion (learner): 50 XP
+- Course creation: 100 XP
+
+Leveling:
+- 1000 XP per level
+- Automatic level calculation
+- Level-up notifications
+
+Badge System:
+- Early Adopter: Join platform
+- Top Mentor: 100+ sessions hosted
+- Expert: 4.8+ rating maintained
+- Level 10 Achiever: Reach level 10
+- Custom badges for achievements
+
+Leaderboard:
+- XP-based ranking
+- Top 100 users
+- Profile information
+- Badge display
+- Level indicators
+
+6.7 REVIEW & RATING
+--------------------
+Review Types:
+- Course reviews
+- Mentor reviews
+
+Rating System:
+- 1-5 star scale
+- Tag categorization
+- Written comments
+- Date tracking
+
+Rating Calculation:
+- Automatic average calculation
+- Course rating updates
+- Mentor rating updates
+- Real-time aggregation
+
+6.8 COMMUNITY FORUM
+--------------------
+Features:
+- Category-based organization
+- Post creation
+- Reply system
+- Search functionality
+- Activity tracking
+- Author profiles
+
+Categories:
+- General
+- Technical Help
+- Course Discussions
+- Mentorship
+- Off-Topic
+
+6.9 MESSAGING SYSTEM
+---------------------
+Features:
+- Direct messaging
+- Chat sessions
+- Message history
+- Participant management
+- Paid/free chat tracking
+- Real-time updates (simulated)
+
+6.10 ADMIN PANEL
+-----------------
+Admin Authentication:
+- Separate login at /admin/login
+- Admin token validation
+- Protected routes
+
+Admin Capabilities:
+- View all users
+- Suspend/activate users
+- View user details
+- Manage platform content
+- Monitor activities
+
+================================================================================
+                          7. DATABASE SCHEMA
+================================================================================
+
+All data is stored in Supabase Key-Value store with the following structure:
+
+USER OBJECT:
+{
+  id: string                    // user-{timestamp}-{random}
+  email: string                 // Unique email address
+  name: string                  // Display name
+  role: string                  // 'learner' | 'mentor' | 'both'
+  avatar?: string               // Profile picture URL
+  bio?: string                  // User biography
+  skills: string[]              // Array of skill tags
+  level: number                 // Calculated from XP
+  xp: number                    // Experience points
+  tokens: number                // Platform currency
+  badges: Badge[]               // Array of earned badges
+  rating?: number               // Average rating (mentors)
+  totalSessions?: number        // Session count (mentors)
+  totalEarnings?: number        // Token earnings (mentors)
+  createdAt: string            // ISO timestamp
+  passwordHash: string          // SHA-256 hashed password
+  status?: string              // 'active' | 'suspended'
+  suspendedAt?: string         // ISO timestamp
+  unsuspendedAt?: string       // ISO timestamp
+  roles?: string[]             // Admin roles
+}
+
+BADGE OBJECT:
+{
+  id: string                    // Badge identifier
+  name: string                  // Display name
+  icon: string                  // Emoji or icon
+  description: string           // Badge description
+  earnedAt: string             // ISO timestamp
+}
+
+COURSE OBJECT:
+{
+  id: string                    // course-{timestamp}-{random}
+  title: string                 // Course name
+  description: string           // Course description
+  mentorId: string              // Reference to mentor
+  mentorName: string            // Mentor display name
+  mentorAvatar?: string         // Mentor profile picture
+  category: string              // Course category
+  price: number                 // Token price
+  rating: number                // Average rating
+  thumbnail: string             // Cover image URL
+  modules: CourseModule[]       // Array of modules
+  resources: Resource[]         // Array of resources
+  enrolled: number              // Enrollment count
+  duration: string              // Total duration
+  language: string              // Course language
+  createdAt: string            // ISO timestamp
+}
+
+COURSE MODULE:
+{
+  id: string                    // Module identifier
+  title: string                 // Module name
+  duration: string              // Module duration
+  videoUrl?: string             // Video URL
+  completed?: boolean           // Completion status
+}
+
+RESOURCE:
+{
+  id: string                    // Resource identifier
+  title: string                 // Resource name
+  type: string                  // 'pdf' | 'link'
+  url: string                   // Resource URL
+}
+
+SESSION OBJECT:
+{
+  id: string                    // session-{timestamp}-{random}
+  mentorId: string              // Reference to mentor
+  mentorName: string            // Mentor display name
+  mentorAvatar?: string         // Mentor profile picture
+  learnerId?: string            // Reference to learner
+  learnerName?: string          // Learner display name
+  type: string                  // '1-on-1' | 'group'
+  title: string                 // Session title
+  date: string                  // Session date
+  startTime: string             // Start time
+  endTime: string               // End time
+  status: string                // 'upcoming' | 'in-progress' | 'completed' | 'cancelled'
+  tokens: number                // Session price
+  meetingUrl?: string           // Video conference URL
+  createdAt: string            // ISO timestamp
+}
+
+TRANSACTION OBJECT:
+{
+  id: string                    // trans-{timestamp}-{random}
+  userId: string                // Reference to user
+  date: string                  // ISO timestamp
+  description: string           // Transaction description
+  amount: number                // Token amount (negative for debit)
+  type: string                  // 'credit' | 'debit'
+  status: string                // 'completed' | 'pending' | 'failed'
+}
+
+ENROLLMENT OBJECT:
+{
+  userId: string                // Reference to user
+  courseId: string              // Reference to course
+  enrolledAt: string           // ISO timestamp
+  progress: number              // Completion percentage
+  completedModules: string[]    // Array of completed module IDs
+}
+
+REVIEW OBJECT:
+{
+  id: string                    // review-{timestamp}-{random}
+  courseId?: string             // Reference to course
+  mentorId?: string             // Reference to mentor
+  userId: string                // Reference to reviewer
+  userName: string              // Reviewer display name
+  userAvatar?: string           // Reviewer profile picture
+  rating: number                // 1-5 star rating
+  tags: string[]                // Review tags
+  comment: string               // Review text
+  date: string                  // ISO timestamp
+}
+
+FORUM POST OBJECT:
+{
+  id: string                    // post-{timestamp}-{random}
+  category: string              // Post category
+  title: string                 // Post title
+  content: string               // Post content
+  authorId: string              // Reference to author
+  authorName: string            // Author display name
+  authorAvatar?: string         // Author profile picture
+  replies: number               // Reply count
+  lastActive: string           // ISO timestamp
+  createdAt: string            // ISO timestamp
+}
+
+NOTIFICATION OBJECT:
+{
+  id: string                    // notif-{timestamp}-{random}
+  userId: string                // Reference to user
+  type: string                  // 'session' | 'badge' | 'message' | 'system'
+  title: string                 // Notification title
+  message: string               // Notification message
+  timestamp: string            // ISO timestamp
+  read: boolean                 // Read status
+}
+
+CHAT SESSION OBJECT:
+{
+  id: string                    // chat-{timestamp}-{random}
+  participants: string[]        // Array of user IDs
+  participantNames: object      // Map of userId to name
+  participantAvatars: object    // Map of userId to avatar
+  lastMessage: string           // Last message content
+  lastMessageTime: string      // ISO timestamp
+  isPaid: boolean               // Payment status
+  createdAt: string            // ISO timestamp
+}
+
+CHAT MESSAGE OBJECT:
+{
+  id: string                    // msg-{timestamp}-{random}
+  sessionId: string             // Reference to chat session
+  senderId: string              // Reference to sender
+  senderName: string            // Sender display name
+  content: string               // Message content
+  timestamp: string            // ISO timestamp
+  type: string                  // 'text' | 'system'
+}
+
+KEY-VALUE STORE KEYS:
+- user:{userId} → User object
+- auth:{email} → userId string
+- course:{courseId} → Course object
+- session:{sessionId} → Session object
+- enrollment:{userId}:{courseId} → Enrollment object
+- transaction:{transactionId} → Transaction object
+- review:{reviewId} → Review object
+- notification:{notificationId} → Notification object
+- forumPost:{postId} → ForumPost object
+- chatSession:{sessionId} → ChatSession object
+- chatMessage:{messageId} → ChatMessage object
+
+RELATIONSHIP TRACKING:
+- mentorCourses:{mentorId} → string[] (course IDs)
+- userEnrollments:{userId} → string[] (course IDs)
+- userSessions:{userId} → string[] (session IDs)
+- userTransactions:{userId} → string[] (transaction IDs)
+- userNotifications:{userId} → string[] (notification IDs)
+- courseReviews:{courseId} → string[] (review IDs)
+- mentorReviews:{mentorId} → string[] (review IDs)
+
+================================================================================
+                       8. API ENDPOINTS REFERENCE
+================================================================================
+
+All endpoints are prefixed with: /make-server-d45a5820
+
+AUTHENTICATION:
+-----------------
+POST /auth/signup
+  Body: { email, password, name, role }
+  Returns: { user }
+
+POST /auth/login
+  Body: { email, password }
+  Returns: { user }
+
+USER MANAGEMENT:
+-----------------
+GET /users
+  Returns: User[] (all users without passwords)
+
+GET /users/:userId
+  Returns: User (without password)
+
+PUT /users/:userId
+  Body: { name?, bio?, avatar?, skills?, role? }
+  Returns: User (updated)
+
+COURSES:
+---------
+POST /courses
+  Body: { mentorId, title, description, category?, price?, thumbnail?, 
+          modules?, resources?, duration?, language? }
+  Returns: Course
+
+GET /courses
+  Query: category?, search?, mentorId?
+  Returns: Course[]
+
+GET /courses/:courseId
+  Returns: Course
+
+PUT /courses/:courseId
+  Body: { title?, description?, category?, price?, thumbnail?, 
+          modules?, resources?, duration?, language? }
+  Returns: Course
+
+DELETE /courses/:courseId
+  Returns: { success: boolean }
+
+ENROLLMENTS:
+-------------
+POST /enrollments
+  Body: { userId, courseId }
+  Returns: Enrollment
+
+GET /enrollments/:userId
+  Returns: Course[] (with progress)
+
+PUT /enrollments/:userId/:courseId/progress
+  Body: { moduleId, completed }
+  Returns: Enrollment
+
+SESSIONS:
+----------
+POST /sessions
+  Body: { mentorId, learnerId?, type?, title, date, startTime, endTime, tokens? }
+  Returns: Session
+
+GET /sessions
+  Query: userId?, status?
+  Returns: Session[]
+
+GET /sessions/:sessionId
+  Returns: Session
+
+PUT /sessions/:sessionId
+  Body: { status }
+  Returns: Session
+
+WALLET & TRANSACTIONS:
+-----------------------
+GET /transactions/:userId
+  Returns: Transaction[]
+
+POST /wallet/topup
+  Body: { userId, amount }
+  Returns: { tokens, transaction }
+
+REVIEWS:
+---------
+POST /reviews
+  Body: { userId, courseId?, mentorId?, rating, tags?, comment? }
+  Returns: Review
+
+GET /reviews
+  Query: courseId?, mentorId?
+  Returns: Review[]
+
+FORUM:
+-------
+POST /forum/posts
+  Body: { authorId, category?, title, content }
+  Returns: ForumPost
+
+GET /forum/posts
+  Query: category?, search?
+  Returns: ForumPost[]
+
+GET /forum/posts/:postId
+  Returns: ForumPost
+
+NOTIFICATIONS:
+---------------
+GET /notifications/:userId
+  Returns: Notification[]
+
+PUT /notifications/:notificationId/read
+  Returns: Notification
+
+LEADERBOARD:
+-------------
+GET /leaderboard
+  Returns: LeaderboardEntry[]
+
+GAMIFICATION:
+--------------
+POST /gamification/award-xp
+  Body: { userId, amount, reason? }
+  Returns: { leveledUp, newLevel, newBadges, reason? }
+
+MESSAGING:
+-----------
+POST /messages/sessions
+  Body: { participantIds, initiatorId }
+  Returns: ChatSession
+
+GET /messages/sessions/:userId
+  Returns: ChatSession[]
+
+GET /messages/:sessionId
+  Returns: ChatMessage[]
+
+POST /messages/:sessionId/send
+  Body: { senderId, content, type? }
+  Returns: ChatMessage
+
+ADMIN:
+-------
+POST /admin/login
+  Body: { username, password }
+  Returns: { token, user }
+
+PUT /admin/users/:userId/suspend
+  Body: { reason }
+  Returns: User
+
+PUT /admin/users/:userId/activate
+  Returns: User
+
+================================================================================
+                           9. USER FLOWS
+================================================================================
+
+9.1 NEW USER REGISTRATION FLOW
+--------------------------------
+1. User visits landing page (/)
+2. Clicks "Get Started" or "Sign Up"
+3. Navigates to /signup
+4. Fills form:
+   - Email
+   - Password
+   - Name
+   - Role selection (Learner, Mentor, Both)
+5. Submits form
+6. Backend creates user with:
+   - Initial level: 1
+   - Initial XP: 0
+   - Initial tokens: 100
+   - Early Adopter badge
+7. User logged in automatically
+8. Redirected to /onboarding
+9. Selects skills (optional)
+10. Redirected to /dashboard
+
+9.2 COURSE ENROLLMENT FLOW
+---------------------------
+1. Learner browses /explore
+2. Applies filters (category, search)
+3. Clicks on course card
+4. Navigates to /course/:id
+5. Reviews:
+   - Course details
+   - Modules
+   - Reviews
+   - Mentor profile
+6. Clicks "Enroll Now"
+7. System checks:
+   - User token balance
+   - Not already enrolled
+8. Deducts tokens from learner
+9. Adds tokens to mentor
+10. Creates enrollment record
+11. Creates transactions (both parties)
+12. Awards 50 XP to learner
+13. Sends notifications (both parties)
+14. Shows success message
+15. Redirects to course player
+
+9.3 COURSE LEARNING FLOW
+--------------------------
+1. Learner accesses enrolled course
+2. Navigates to /course/:id/play
+3. Views course modules list
+4. Selects first/next incomplete module
+5. Watches video
+6. Clicks "Mark as Complete"
+7. Backend:
+   - Updates enrollment progress
+   - Awards 20 XP
+   - Checks for course completion
+8. If course completed:
+   - Awards bonus 100 XP
+   - Checks for new badges
+   - Sends completion notification
+9. Learner continues to next module
+
+9.4 SESSION BOOKING FLOW
+--------------------------
+1. Learner browses mentor profile
+2. Views available sessions
+3. Clicks "Book Session"
+4. Selects:
+   - Date
+   - Time slot
+   - Session type (1-on-1/group)
+5. Reviews token cost
+6. Confirms booking
+7. System:
+   - Checks token balance
+   - Deducts tokens from learner
+   - Creates session record
+   - Generates meeting URL
+   - Creates transaction
+   - Sends notifications (both parties)
+8. Session appears in dashboard
+9. On session day:
+   - Participants join via meeting URL
+   - Status updates to "in-progress"
+10. After session:
+    - Mentor marks as completed
+    - Tokens transferred to mentor
+    - XP awarded (both parties)
+    - Review prompt sent to learner
+
+9.5 COURSE CREATION FLOW (MENTOR)
+-----------------------------------
+1. Mentor navigates to /create-course
+2. Fills course form:
+   - Title
+   - Description
+   - Category
+   - Price (tokens)
+   - Thumbnail URL
+   - Language
+3. Adds modules:
+   - Module title
+   - Duration
+   - Video URL
+4. Adds resources:
+   - Resource title
+   - Type (PDF/Link)
+   - URL
+5. Reviews course preview
+6. Clicks "Publish Course"
+7. Backend:
+   - Creates course record
+   - Links to mentor
+   - Awards 100 XP
+   - Sends confirmation notification
+8. Course appears in explore page
+9. Course listed in mentor dashboard
+
+9.6 GAMIFICATION FLOW
+----------------------
+XP Earning:
+- Automatic on specific actions
+- Real-time level calculation
+- Level-up notification if threshold crossed
+- New badge check on level-up
+
+Badge Earning:
+- Checked after major events:
+  * Course completion
+  * Session completion
+  * Level-up
+- New badges appear in profile
+- Notification sent for new badge
+
+Leaderboard:
+- Updated after XP changes
+- Shows top 100 users
+- Sorted by XP descending
+- Displays level and badges
+
+================================================================================
+                      10. DEPLOYMENT & CONFIGURATION
+================================================================================
+
+SUPABASE CONFIGURATION:
+------------------------
+Location: /utils/supabase/info.tsx
+
+Required values (auto-configured in Figma Make):
+- projectId: Your Supabase project ID
+- publicAnonKey: Supabase anonymous key
+
+Environment variables already set:
+- SUPABASE_URL
+- SUPABASE_ANON_KEY
+- SUPABASE_SERVICE_ROLE_KEY
+- SUPABASE_DB_URL
+
+FRONTEND DEPLOYMENT:
+---------------------
+The frontend is automatically deployed by Figma Make.
+No additional configuration needed.
+
+BACKEND DEPLOYMENT:
+--------------------
+The Supabase Edge Function is automatically deployed.
+Server runs at: https://{projectId}.supabase.co/functions/v1/make-server-d45a5820
+
+API CLIENT:
+------------
+Location: /utils/api.ts
+
+Automatically constructs API URLs using:
+- projectId from /utils/supabase/info.tsx
+- Route prefix: /make-server-d45a5820
+
+All requests include:
+- Content-Type: application/json
+- Authorization: Bearer {publicAnonKey}
+
+SESSION MANAGEMENT:
+--------------------
+User data stored in localStorage:
+- Key: 'user'
+- Value: JSON stringified user object
+- Managed by AppContext
+
+Admin authentication:
+- Key: 'adminToken'
+- Value: Admin token string
+
+CORS CONFIGURATION:
+--------------------
+Backend accepts requests from any origin (*)
+Allowed headers: Content-Type, Authorization, X-Admin-Token
+Allowed methods: GET, POST, PUT, DELETE, OPTIONS
+
+================================================================================
+                         11. TROUBLESHOOTING
+================================================================================
+
+COMMON ISSUES:
+
+1. "Failed to fetch" errors
+   - Backend server not running (shouldn't happen in production)
+   - Check Supabase Edge Function status
+   - Verify projectId in /utils/supabase/info.tsx
+
+2. Authentication failures
+   - Check email/password correctness
+   - Verify user exists in database
+   - Clear localStorage and try again
+
+3. Token deduction errors
+   - Verify user has sufficient tokens
+   - Check transaction history
+   - Use wallet top-up feature
+
+4. Course enrollment issues
+   - Confirm course exists
+   - Check if already enrolled
+   - Verify token balance
+
+5. Progress not saving
+   - Check enrollment exists
+   - Verify moduleId is correct
+   - Check console for errors
+
+6. XP not updating
+   - XP updates are automatic
+   - Check user object in database
+   - Verify action triggers XP award
+
+7. Badges not appearing
+   - Badges checked after specific events
+   - Must meet badge criteria
+   - Check badge logic in backend
+
+8. Admin login failing
+   - Use correct admin credentials
+   - Check admin route exists
+   - Verify admin token storage
+
+DEBUGGING:
+
+Server logs:
+- Check Supabase Edge Function logs
+- All errors logged with context
+
+Frontend logs:
+- Open browser console
+- API errors displayed
+- State changes logged (in dev mode)
+
+Data inspection:
+- Cannot directly access KV store
+- Use API endpoints to retrieve data
+- Check user object for debug info
+
+RESET DATA:
+- Clear localStorage in browser
+- Create new user account
+- Use different email address
+
+================================================================================
+                             ADDITIONAL NOTES
+================================================================================
+
+SECURITY CONSIDERATIONS:
+- Passwords hashed with SHA-256 (note: for production, use bcrypt or argon2)
+- Public anon key safe for client-side use
+- Service role key never exposed to frontend
+- Admin token stored client-side (for demo purposes)
+
+SCALABILITY:
+- KV Store suitable for prototyping
+- For production, consider:
+  * Separate database (PostgreSQL)
+  * Proper authentication (JWT)
+  * Rate limiting
+  * Caching layer
+  * CDN for media files
+
+FUTURE ENHANCEMENTS:
+- Real-time features (WebSockets)
+- Video streaming infrastructure
+- Payment gateway integration
+- Email service integration
+- Push notifications
+- Mobile app (React Native)
+- Analytics dashboard
+- Advanced search (Elasticsearch)
+- Content moderation tools
+- Multi-language support
+
+MERN STACK REMOVED:
+- All MongoDB models deleted
+- All Express routes deleted
+- All MERN documentation deleted
+- Only Supabase backend remains
+- All references cleaned up
+
+DOCUMENTATION HISTORY:
+- Version 1.0: MERN implementation
+- Version 2.0: Supabase implementation (current)
+- Date: January 2, 2026
+
+================================================================================
+                              END OF DOCUMENTATION
+================================================================================
+
+For questions or issues, refer to the code comments in:
+- /supabase/functions/server/index.tsx (backend logic)
+- /context/AppContext.tsx (state management)
+- /utils/api.ts (API client)
+
+All features are working and tested with the Supabase backend.
