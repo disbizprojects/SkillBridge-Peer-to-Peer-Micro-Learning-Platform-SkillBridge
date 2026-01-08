@@ -174,10 +174,10 @@ For detailed troubleshooting, see section 11 in All details.txt.
 
 ⚠️ Note on Backend
 
-This platform uses Supabase backend only. All MERN stack files have been removed:
+This platform uses Supabase backend only
 
     ✅ Supabase Edge Functions (current)
-    ❌ MongoDB + Express (removed)
+    
 
 🎨 Design System
 
