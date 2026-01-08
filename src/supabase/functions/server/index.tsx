@@ -1,3 +1,4 @@
+// ============= IMPORTS =============
 import { Hono } from "npm:hono";
 import { cors } from "npm:hono/cors";
 import { logger } from "npm:hono/logger";
@@ -181,7 +182,7 @@ interface ChatMessage {
 
 // ============= HELPER FUNCTIONS =============
 
-// Simple hash function (for demo purposes only - use proper hashing in production)
+// Simple hash function
 async function hashPassword(password: string): Promise<string> {
   const encoder = new TextEncoder();
   const data = encoder.encode(password);
