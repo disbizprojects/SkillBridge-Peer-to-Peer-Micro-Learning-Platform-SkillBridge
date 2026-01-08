@@ -1,13 +1,5 @@
 SkillShare - Peer-to-Peer Learning Platform
 
-A comprehensive learning platform connecting learners with mentors through micro-courses and live sessions.
-🚀 Quick Start
-
-    Access the Platform: The app is already running in Figma Make
-    Landing Page: Visit / to see the homepage
-    Sign Up: Create an account at /signup
-    Choose Role: Select Learner, Mentor, or Both
-    Start Learning: Browse courses, book sessions, earn XP!
 
 📚 Complete Documentation
 
