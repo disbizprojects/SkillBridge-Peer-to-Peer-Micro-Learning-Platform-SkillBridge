@@ -22,7 +22,7 @@ interface CourseReviewsProps {
   courseId: string;
   canReview?: boolean;
 }
-
+//variables
 export const CourseReviews: React.FC<CourseReviewsProps> = ({ courseId, canReview = false }) => {
   const { currentUser } = useApp();
   const [reviews, setReviews] = useState<Review[]>([]);
